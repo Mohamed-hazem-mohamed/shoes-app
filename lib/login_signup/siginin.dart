@@ -3,6 +3,8 @@ import 'package:project/home/home.dart';
 import 'package:project/login_signup/signup.dart';
 import 'package:project/reusableWidget/textformfield.dart';
 
+import '../bottom_nav_bar/bottom_nav_bar.dart';
+
 class Siginin extends StatefulWidget {
   const Siginin({super.key});
 
@@ -143,7 +145,7 @@ class _SigininState extends State<Siginin> {
                           Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (_) => Home())
+                                  builder: (_) => BottomNavBar())
                           );
                         }
                       },

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:project/home/home.dart';
-import 'package:project/login_signup/signup.dart';
+import 'package:project/diohelper/diohelper.dart';
+import 'package:project/bottom_nav_bar/bottom_nav_bar.dart';
 import 'package:project/reusableWidget/textformfield.dart';
-
 import 'forgetpassword.dart';
+import 'signup.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -14,18 +14,42 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
-  final TextEditingController emailController = TextEditingController();
+  final TextEditingController usernameController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-
   bool _obscurePassword = true;
+  bool isLoading = false;
+
+  Future<void> _handleLogin() async {
+    if (_formKey.currentState!.validate()) {
+      setState(() => isLoading = true);
+      try {
+        await DioHelper().login(
+          username: usernameController.text.trim(),
+          password: passwordController.text.trim(),
+        );
+
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => BottomNavBar()),
+        );
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(e.toString().replaceAll("Exception: ", "")),
+            backgroundColor: Colors.red,
+          ),
+        );
+      } finally {
+        setState(() => isLoading = false);
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        leading: Navigator.canPop(context)
-            ? BackButton(color: Colors.black)
-            : null,
+        leading: Navigator.canPop(context) ? BackButton(color: Colors.black) : null,
         backgroundColor: Colors.transparent,
         elevation: 0,
       ),
@@ -37,34 +61,20 @@ class _LoginScreenState extends State<LoginScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Align(
-                  alignment: Alignment.center,
-                  child: Text(
-                    "Welcome Back!",
-                    style: TextStyle(fontSize: 28, fontWeight: FontWeight.w500),
-                  ),
-                ),
+                Center(child: Text("Welcome Back!", style: TextStyle(fontSize: 28, fontWeight: FontWeight.w500))),
                 SizedBox(height: 8),
-                Align(
-                  alignment: Alignment.center,
-                  child: Text(
-                    "Log in to continue",
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w300),
-                  ),
-                ),
+                Center(child: Text("Log in to continue", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w300))),
                 SizedBox(height: 50),
-                Text("Email Address", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
+
+                Text("Username", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
                 SizedBox(height: 10),
                 customTextFormField(
-                  label: "Enter your email",
-                  prefixIcon: Icons.email,
-                  controller: emailController,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) return 'Please enter your email';
-                    if (!value.contains('@')) return 'Enter a valid email';
-                    return null;
-                  },
+                  label: "Enter your username",
+                  prefixIcon: Icons.person,
+                  controller: usernameController,
+                  validator: (value) => value == null || value.isEmpty ? 'Please enter your username' : null,
                 ),
+
                 SizedBox(height: 20),
                 Text("Password", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
                 customTextFormField(
@@ -73,26 +83,17 @@ class _LoginScreenState extends State<LoginScreen> {
                   obscureText: _obscurePassword,
                   suffixIcon: IconButton(
                     icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility),
-                    onPressed: () {
-                      setState(() => _obscurePassword = !_obscurePassword);
-                    },
+                    onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
                   ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) return 'Please enter your password';
-                    if (value.length < 6) return 'Password must be at least 6 characters';
-                    return null;
-                  },
+                  validator: (value) => value == null || value.isEmpty ? 'Please enter your password' : null,
                 ),
+
                 SizedBox(height: 20),
                 GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => ForgetPasswordPage()));
-                  },
-                  child: Text("Forgot Password?",
-                      style: TextStyle(fontSize: 15, fontWeight: FontWeight.w300)),
+                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => ForgetPasswordPage())),
+                  child: Text("Forgot Password?", style: TextStyle(fontSize: 15, fontWeight: FontWeight.w300)),
                 ),
+
                 SizedBox(height: 40),
                 Center(
                   child: Container(
@@ -103,19 +104,14 @@ class _LoginScreenState extends State<LoginScreen> {
                     height: 58,
                     width: double.infinity,
                     child: MaterialButton(
-                      onPressed: () {
-                        if (_formKey.currentState!.validate()) {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (_) => Home())
-                          );
-                        }
-                      },
-                      child: Text("Login", style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+                      onPressed: isLoading ? null : _handleLogin,
+                      child: isLoading
+                          ? CircularProgressIndicator(color: Colors.white)
+                          : Text("Login", style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
                     ),
                   ),
                 ),
+
                 SizedBox(height: 30),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -125,20 +121,18 @@ class _LoginScreenState extends State<LoginScreen> {
                     Text("Log in with Google", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
                   ],
                 ),
+
                 SizedBox(height: 80),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text("Don't have an account? "),
                     TextButton(
-                      onPressed: () {
-                        Navigator.push(context, MaterialPageRoute(builder: (_) => Signup()));
-                      },
+                      onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => Signup())),
                       child: Text("Sign up for free", style: TextStyle(fontWeight: FontWeight.bold)),
                     ),
                   ],
                 ),
-
               ],
             ),
           ),

@@ -3,6 +3,8 @@ import 'package:project/home/home.dart';
 import 'package:project/login_signup/siginin.dart';
 import 'package:project/reusableWidget/textformfield.dart';
 
+import '../bottom_nav_bar/bottom_nav_bar.dart';
+
 class Signup extends StatefulWidget {
   const Signup({super.key});
 
@@ -118,7 +120,7 @@ class _SignupState extends State<Signup> {
 
                           Navigator.push(
                               context,
-                              MaterialPageRoute(builder: (_) => Home()));
+                              MaterialPageRoute(builder: (_) => BottomNavBar()));
                         }
                       },
                       child: Text(

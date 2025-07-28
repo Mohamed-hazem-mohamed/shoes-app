@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:project/home/cubit/cubit.dart';
 import 'package:project/home/cubit/state.dart';
+import '../details.dart';
 import '../reusableWidget/cistomcard.dart';
 
 class Firsttap extends StatelessWidget {
@@ -12,7 +13,6 @@ class Firsttap extends StatelessWidget {
     return BlocBuilder<HomeCubit, HomeState>(
       builder: (context, state) {
         var cubit = HomeCubit.get(context);
-
         if (state is LoadingState) {
           return const Center(child: CircularProgressIndicator());
         }
@@ -34,12 +34,18 @@ class Firsttap extends StatelessWidget {
             itemBuilder: (context, index) {
               final product = cubit.productList[index];
               return customCard(
+                context: context,
                 imageUrl: product.thumbnail,
                 productName: product.title,
                 price: product.price,
                 onAddPressed: () {
                   print('Added product ${product.id}');
                 },
+                onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => ProductDetailsPage(product:product ,),
+                    )
+                ),
               );
             },
           ),

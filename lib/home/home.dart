@@ -18,6 +18,7 @@ class Home extends StatelessWidget {
         },
         builder: (context, state) {
           final TextEditingController searchController = TextEditingController();
+          bool is_selected = true ;
           return DefaultTabController(
             length: 3,
             child: Scaffold(
